@@ -15,6 +15,7 @@ export interface QuizSetForm {
   title: string
   description: string
   mode: 'quiz' | 'qa'
+  access_password: string
   questions: QuestionForm[]
 }
 
@@ -37,6 +38,7 @@ export default function QuizCreator({ initial, onSubmit, loading, submitLabel }:
     title: '',
     description: '',
     mode: 'quiz',
+    access_password: '',
     questions: [emptyQuestion('quiz')],
   })
 
@@ -154,6 +156,18 @@ export default function QuizCreator({ initial, onSubmit, loading, submitLabel }:
               </button>
             ))}
           </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Mật khẩu tham gia <span className="text-gray-400 font-normal">(để trống = ai cũng vào được)</span>
+          </label>
+          <input
+            type="text"
+            value={form.access_password}
+            onChange={(e) => setForm((f) => ({ ...f, access_password: e.target.value }))}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            placeholder="Ví dụ: lop12a1"
+          />
         </div>
       </div>
 

@@ -18,6 +18,8 @@ export interface QuizSet {
   title: string
   description: string | null
   mode: 'quiz' | 'qa'
+  access_password: string | null
+  has_password: boolean
   created_by: string | null
   created_by_username: string | null
   created_at: string
@@ -28,4 +30,12 @@ export interface AuthUser {
   user_id: string
   username: string
   access_token: string
+}
+
+export interface SessionResult {
+  id: string
+  participant_name: string
+  score: number
+  total: number
+  completed_at: string
 }

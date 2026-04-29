@@ -8,6 +8,7 @@ import CreateSet from './pages/CreateSet'
 import SetDetail from './pages/SetDetail'
 import PlaySet from './pages/PlaySet'
 import EditSet from './pages/EditSet'
+import JoinSet from './pages/JoinSet'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/sets/create" element={<CreateSet />} />
               <Route path="/sets/:id" element={<SetDetail />} />
+              <Route path="/sets/:id/join" element={<JoinSet />} />
               <Route path="/sets/:id/play" element={<PlaySet />} />
               <Route path="/sets/:id/edit" element={<EditSet />} />
             </Routes>

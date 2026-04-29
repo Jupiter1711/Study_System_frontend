@@ -26,6 +26,7 @@ export default function CreateSet() {
         title: form.title,
         description: form.description || null,
         mode: form.mode,
+        access_password: form.access_password || null,
         questions: form.questions.map((q, qi) => ({
           question_text: q.question_text,
           correct_answer: form.mode === 'qa' ? q.correct_answer : null,

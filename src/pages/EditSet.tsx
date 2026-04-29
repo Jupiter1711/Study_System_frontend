@@ -15,10 +15,10 @@ export default function EditSet() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    client.get(`/api/sets/${id}`).then((res) => {
+    client.get(`/api/sets/${id}/detail`).then((res) => {
       setSet(res.data)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [id])
 
   if (loading) return <div className="text-center text-gray-400 py-20">Đang tải...</div>
@@ -32,6 +32,7 @@ export default function EditSet() {
     title: set.title,
     description: set.description || '',
     mode: set.mode,
+    access_password: set.access_password || '',
     questions: set.questions.map((q) => ({
       question_text: q.question_text,
       correct_answer: q.correct_answer || '',
@@ -46,6 +47,8 @@ export default function EditSet() {
       const payload = {
         title: form.title,
         description: form.description || null,
+        mode: form.mode,
+        access_password: form.access_password || null,
         questions: form.questions.map((q, qi) => ({
           question_text: q.question_text,
           correct_answer: form.mode === 'qa' ? q.correct_answer : null,

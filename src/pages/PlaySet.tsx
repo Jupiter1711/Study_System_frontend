@@ -1,23 +1,33 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import type { QuizSet } from '../types'
 import QuizPlayer from '../components/quiz/QuizPlayer'
 import QAPlayer from '../components/quiz/QAPlayer'
 
+interface LocationState {
+  set: QuizSet
+  participantName: string
+}
+
 export default function PlaySet() {
   const { id } = useParams<{ id: string }>()
-  const [set, setSet] = useState<QuizSet | null>(null)
-  const [loading, setLoading] = useState(true)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const state = location.state as LocationState | null
+
+  const [set, setSet] = useState<QuizSet | null>(state?.set ?? null)
+  const [participantName] = useState<string>(state?.participantName ?? '')
+  const [loading, setLoading] = useState(!state)
   const [result, setResult] = useState<{ score: number; total: number } | null>(null)
 
   useEffect(() => {
-    client.get(`/api/sets/${id}`)
-      .then((res) => setSet(res.data))
-      .finally(() => setLoading(false))
-  }, [id])
+    if (state) return
+    // No join state — redirect to join page so participant enters name/password
+    navigate(`/sets/${id}/join`, { replace: true })
+  }, [id, state, navigate])
 
-  if (loading) return <div className="text-center text-gray-400 py-20">Đang tải...</div>
+  if (loading || !state) return <div className="text-center text-gray-400 py-20">Đang tải...</div>
   if (!set) return <div className="text-center text-red-500 py-20">Không tìm thấy bộ câu hỏi.</div>
   if (set.questions.length === 0) {
     return (
@@ -28,11 +38,25 @@ export default function PlaySet() {
     )
   }
 
+  const handleFinish = async (score: number, total: number) => {
+    setResult({ score, total })
+    try {
+      await client.post(`/api/sets/${id}/results`, {
+        participant_name: participantName,
+        score,
+        total,
+      })
+    } catch {
+      // Result save failure is non-critical
+    }
+  }
+
   if (result) {
     const pct = Math.round((result.score / result.total) * 100)
     return (
       <div className="max-w-md mx-auto mt-12">
         <div className="bg-white rounded-xl shadow p-8 text-center">
+          <p className="text-gray-500 text-sm mb-2">Kết quả của <strong>{participantName}</strong></p>
           <div className={`text-5xl font-bold mb-2 ${pct >= 70 ? 'text-green-500' : pct >= 40 ? 'text-yellow-500' : 'text-red-500'}`}>
             {pct}%
           </div>
@@ -44,7 +68,10 @@ export default function PlaySet() {
           </p>
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => setResult(null)}
+              onClick={() => {
+                setResult(null)
+                setSet(state.set)
+              }}
               className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-indigo-700"
             >
               Làm lại
@@ -74,9 +101,9 @@ export default function PlaySet() {
       </div>
 
       {set.mode === 'quiz' ? (
-        <QuizPlayer questions={set.questions} onFinish={(score, total) => setResult({ score, total })} />
+        <QuizPlayer questions={set.questions} onFinish={handleFinish} />
       ) : (
-        <QAPlayer questions={set.questions} onFinish={(score, total) => setResult({ score, total })} />
+        <QAPlayer questions={set.questions} onFinish={handleFinish} />
       )}
     </div>
   )
